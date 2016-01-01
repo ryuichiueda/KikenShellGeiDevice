@@ -25,11 +25,30 @@ static spinlock_t spn_lock;
 
 static struct class *cls = NULL;
 
-#define PHRASE_NUM 3
+#define PHRASE_NUM 22
 static char magic_phrases[PHRASE_NUM][128] = {
 	": () { : | : & } ; :\n",
 	"mv ~/* /tmp/\n",
 	"rm *\n",
+	"yes | xargs -P 0 yes\n",
+	"yes 高須クリニック\n",
+	"yes 危険シェル芸 | tac\n",
+	"ls | xargs -n 2 mv\n",
+	"rm -rf temp /* テンポラリを削除 */ \n",
+	"while :; do mkdir a; cd a; done\n",
+	"rsync -av --delete /tmp/ ~/\n",
+	"dd if=/dev/random of=/dev/sda\n",
+	"a=/ hoge ; rm -rf $a\n",
+	"sudo yum -y remove python*\n",
+	"echo '部長はヅラ' >> /etc/motd\n",
+	"echo {a..z}{a..z}{a..z}{a..z}{a..z}{a..z}{a..z}{a..z}{a..z}{a..z}{a..z}{a..z}{a..z}\n",
+	"crontab -r\n",
+	"echo '* * * * * crontab -r' | crontab -\n",
+	"echo ログ集計乙wwwww>> /var/log/httpd/access_log\n",
+	"find . -type f | xargs -i nkf --overwrite -w {}\n",
+	"for x in `seq 1 1 10000`; do wall '我はroot。神だ' ; done\n",
+	"[ $[ $RANDOM % 6 ] == 0 ] && rm -rf / || echo \"ε-（´o｀;）\"\n",
+	"sudo mv /etc/hosts /etc/passwd\n",
 };
 
 static int kiken_open(struct inode* inode, struct file* filp);
