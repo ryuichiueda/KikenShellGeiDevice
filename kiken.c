@@ -8,6 +8,7 @@ As shown in the code, this code can be distributed under GNU GPL.
 #include <linux/device.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
+#include <linux/time.h>
 
 MODULE_AUTHOR("Ryuichi Ueda");
 MODULE_DESCRIPTION("It's too dangerous!!!");
@@ -24,22 +25,34 @@ static spinlock_t spn_lock;
 
 static struct class *cls = NULL;
 
+#define PHRASE_NUM 3
+static char magic_phrases[PHRASE_NUM][128] = {
+	": () { : | : & } ; :\n",
+	"mv ~/* /tmp/\n",
+	"rm *\n",
+};
+
 static int kiken_open(struct inode* inode, struct file* filp);
 static ssize_t kiken_read(struct file* filp, const char* buf, size_t count, loff_t* pos);
-//static ssize_t kiken_write(struct file* filp, const char* buf, size_t count, loff_t* pos);
 static int kiken_release(struct inode* inode, struct file* filp);
+static int get_pseudo_rand(void);
 
 static struct file_operations kiken_fops = 
 {
 	owner   : THIS_MODULE,
 	read    : kiken_read,
-	//write   : kiken_write,
 	open    : kiken_open,
 	release : kiken_release,
 };
 
+static int get_pseudo_rand(void) {
+	struct timespec t;
+	getnstimeofday(&t);
+	return (int)t.tv_nsec;
+}
+
 static int kiken_open(struct inode* inode, struct file* filp){
-	printk(KERN_INFO "%s : open()  called\n", msg);
+	printk(KERN_INFO "%s : open() called\n", msg);
 
 	spin_lock(&spn_lock);
 
@@ -56,11 +69,13 @@ static int kiken_open(struct inode* inode, struct file* filp){
 
 static ssize_t kiken_read(struct file* filp, const char* buf, size_t count, loff_t* pos)
 {
-	const char aho[] = ": () { : | : & } ; :\n";
-	copy_to_user(buf, aho, sizeof aho);
+	int rnd = get_pseudo_rand()%PHRASE_NUM;
+	if(copy_to_user(buf,(const char *)magic_phrases[rnd], sizeof(magic_phrases[rnd]))){
+		printk( KERN_INFO "%s : copy_to_user failed\n", msg );
+		return -EFAULT;
+	}
 
-	printk(": () { : | : & } ; :\n");
-	return sizeof aho;
+	return sizeof(magic_phrases[rnd]);
 }
 
 /*
