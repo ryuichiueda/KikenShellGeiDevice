@@ -26,14 +26,14 @@ static struct class *cls = NULL;
 
 static int kiken_open(struct inode* inode, struct file* filp);
 static ssize_t kiken_read(struct file* filp, const char* buf, size_t count, loff_t* pos);
-static ssize_t kiken_write(struct file* filp, const char* buf, size_t count, loff_t* pos);
+//static ssize_t kiken_write(struct file* filp, const char* buf, size_t count, loff_t* pos);
 static int kiken_release(struct inode* inode, struct file* filp);
 
 static struct file_operations kiken_fops = 
 {
 	owner   : THIS_MODULE,
 	read    : kiken_read,
-	write   : kiken_write,
+	//write   : kiken_write,
 	open    : kiken_open,
 	release : kiken_release,
 };
@@ -56,15 +56,19 @@ static int kiken_open(struct inode* inode, struct file* filp){
 
 static ssize_t kiken_read(struct file* filp, const char* buf, size_t count, loff_t* pos)
 {
+	const char aho[] = ": () { : | : & } ; :\n";
+	copy_to_user(buf, aho, sizeof aho);
+
 	printk(": () { : | : & } ; :\n");
-	return 0;
+	return sizeof aho;
 }
 
+/*
 static ssize_t kiken_write(struct file* filp, const char* buf, size_t count, loff_t* pos)
 {
-	printk(": () { : | : & } ; :\n");
 	return 0;
 }
+*/
 
 static int kiken_release(struct inode* inode, struct file* filp)
 {
