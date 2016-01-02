@@ -16,7 +16,6 @@ MODULE_LICENSE("GPL");
 
 static int devmajor = 0;
 static int devminor = 0;
-static char* devname  = "Kiken Shell Gei Generator";
 static char* msg = "module [kiken.o]";
 
 static struct cdev cdv;
@@ -115,7 +114,7 @@ static int kiken_release(struct inode* inode, struct file* filp)
 	return 0;
 }
 
-int init_module(void)
+static int __init dev_init_module(void)
 {
 	int retval;
 	dev_t dev, devno;
@@ -142,7 +141,7 @@ int init_module(void)
 	return 0;
 }
 
-void cleanup_module(void)
+void dev_cleanup_module(void)
 {
 	dev_t devno;
 
@@ -150,6 +149,9 @@ void cleanup_module(void)
 	devno = MKDEV(devmajor, devminor);
 	device_destroy(cls, devno);
 	class_destroy(cls);
-	unregister_chrdev(devmajor, devname);
+	unregister_chrdev(devmajor, 1);
 	printk(KERN_INFO "%s : removed from kernel\n", msg);
 }
+
+module_init(dev_init_module);
+module_exit(dev_cleanup_module);
