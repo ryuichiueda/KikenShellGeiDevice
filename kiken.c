@@ -141,7 +141,7 @@ static int __init dev_init_module(void)
 	return 0;
 }
 
-void dev_cleanup_module(void)
+static void __exit dev_cleanup_module(void)
 {
 	dev_t devno;
 
