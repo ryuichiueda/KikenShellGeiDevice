@@ -2,6 +2,7 @@
  *
 As shown in the code, this code can be distributed under GNU GPL.
 */
+#include <linux/pgtable.h>
 #include <asm/uaccess.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
@@ -23,6 +24,7 @@ static int access_num = 0;
 static spinlock_t spn_lock;
 
 static struct class *cls = NULL;
+static int counter = 0;
 
 #define PHRASE_NUM 22
 static char magic_phrases[PHRASE_NUM][128] = {
@@ -51,9 +53,9 @@ static char magic_phrases[PHRASE_NUM][128] = {
 };
 
 static int kiken_open(struct inode* inode, struct file* filp);
-static ssize_t kiken_read(struct file* filp, const char* buf, size_t count, loff_t* pos);
+static ssize_t kiken_read(struct file* filp, char* buf, size_t count, loff_t* pos);
 static int kiken_release(struct inode* inode, struct file* filp);
-static int get_pseudo_rand(void);
+//static int get_pseudo_rand(void);
 
 static struct file_operations kiken_fops = 
 {
@@ -63,11 +65,12 @@ static struct file_operations kiken_fops =
 	release : kiken_release,
 };
 
+/*
 static int get_pseudo_rand(void) {
 	struct timespec t;
 	getnstimeofday(&t);
 	return (int)t.tv_nsec;
-}
+}*/
 
 static int kiken_open(struct inode* inode, struct file* filp){
 	printk(KERN_INFO "%s : open() called\n", msg);
@@ -85,9 +88,10 @@ static int kiken_open(struct inode* inode, struct file* filp){
 	return 0;
 }
 
-static ssize_t kiken_read(struct file* filp, const char* buf, size_t count, loff_t* pos)
+static ssize_t kiken_read(struct file* filp, char* buf, size_t count, loff_t* pos)
 {
-	int rnd = get_pseudo_rand()%PHRASE_NUM;
+	//int rnd = counter++;//get_pseudo_rand()%PHRASE_NUM;
+	int rnd = (counter++)%PHRASE_NUM;
 	if(copy_to_user(buf,(const char *)magic_phrases[rnd], sizeof(magic_phrases[rnd]))){
 		printk( KERN_INFO "%s : copy_to_user failed\n", msg );
 		return -EFAULT;
@@ -125,7 +129,8 @@ static int __init dev_init_module(void)
 		return retval;
 	}
 	
-	cls = class_create(THIS_MODULE,"kiken");
+	/* cls = class_create(THIS_MODULE,"kiken"); */
+	cls = class_create("kiken");
 	if(IS_ERR(cls))
 		return PTR_ERR(cls);
 
